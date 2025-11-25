@@ -1,6 +1,8 @@
 package org.example.untitled.model;
 
-import jdk.vm.ci.meta.Local;
+
+import lombok.Getter;
+import lombok.Setter;
 import org.openxava.annotations.Money;
 import org.openxava.annotations.Required;
 
@@ -12,6 +14,8 @@ import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
+@Getter
+@Setter
 public class Contrato extends BaseEntity {
 
     @Required

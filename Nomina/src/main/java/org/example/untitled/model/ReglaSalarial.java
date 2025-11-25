@@ -1,6 +1,8 @@
 package org.example.untitled.model;
 
 
+import lombok.Getter;
+import lombok.Setter;
 import org.openxava.annotations.Required;
 import org.openxava.annotations.Stereotype;
 
@@ -11,6 +13,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.EnumType;
 
 @Entity
+@Getter
+@Setter
 public class ReglaSalarial extends BaseEntity {
 
     @Required
@@ -23,7 +27,7 @@ public class ReglaSalarial extends BaseEntity {
 
     @Required
     @Column(length = 300)
-    @Stereotype("TEXT")
+    @Stereotype("MEMO") //Texto Plano Multilínea Crea una caja de texto grande (un textarea de HTML).
     private String formula;
 
     @Required

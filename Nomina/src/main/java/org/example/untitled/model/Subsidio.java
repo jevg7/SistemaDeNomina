@@ -1,5 +1,7 @@
 package org.example.untitled.model;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.dom4j.tree.AbstractEntity;
 import org.openxava.annotations.Required;
 
@@ -10,6 +12,8 @@ import javax.persistence.ManyToOne;
 import java.time.LocalDate;
 
 @Entity
+@Getter
+@Setter
 public class Subsidio extends BaseEntity {
 
     @ManyToOne @Required

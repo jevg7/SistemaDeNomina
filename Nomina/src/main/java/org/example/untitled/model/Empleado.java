@@ -1,6 +1,8 @@
 package org.example.untitled.model;
 
 
+import lombok.Getter;
+import lombok.Setter;
 import org.openxava.annotations.Money;
 import org.openxava.annotations.Required;
 
@@ -9,6 +11,8 @@ import javax.validation.constraints.Min;
 import java.util.Date;
 
 @Entity
+@Getter
+@Setter
 public class Empleado extends BaseEntity {
 
     @Required
