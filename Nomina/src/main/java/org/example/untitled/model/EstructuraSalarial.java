@@ -21,7 +21,7 @@ public class EstructuraSalarial extends BaseEntity {
     private String nombre;
 
     @OneToMany(mappedBy = "estructura", cascade = CascadeType.ALL)
-    @ListAction("GenerarReglasEstructura")
+    //  @ListAction("GenerarReglasEstructura")
     private List<ReglaSalarial> reglas;
 
 

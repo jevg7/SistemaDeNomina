@@ -36,4 +36,5 @@ public class GastoDeducible extends BaseEntity {
 
     @Stereotype("FILE") // Longitud recomendada para guardar el ID del archivo
     private String soporteDigital; // Aquí se sube la factura escaneada
+
 }

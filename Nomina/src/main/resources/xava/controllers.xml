@@ -12,14 +12,15 @@
     <object name="untitled_activeYear" class="java.lang.Integer" value="2015" 
     	    scope="global"/>    
     -->
-    
-    <!-- Controller:
-    <controller name="Teacher">
-    	<extends controller="Typical"/>
-    	<action name="new" icon="library-plus" keystroke="Control N"
-        	class="actions.CreateTeacher">
-    	</action>
-	</controller>    
-    -->
+
+    <controllers>
+    <controller name="LoteNomina">
+        <extends controller="Typical"/>
+        <action name="procesar"
+                class="org.example.untitled.actions.ProcesarNominaAction"
+                mode="detail"
+                image="execute.gif"/> </controller>
+</controllers>
+
     
 </controllers>

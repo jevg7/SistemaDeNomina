@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -20,7 +21,7 @@ public class Contrato extends BaseEntity {
 
     @Required
     @Money
-    private Double salarioBase;
+    private BigDecimal salarioBase;
 
     @Required
     private LocalDate fechaContrato;
@@ -31,7 +32,12 @@ public class Contrato extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TipoContrato tipoContrato;
 
+    public BigDecimal getSalarioMensual() {
+        return this.salarioBase;
+    }
     @ManyToOne
     private EstructuraSalarial estructura;
+    @ManyToOne
+    private Empleado empleado;
 
 }

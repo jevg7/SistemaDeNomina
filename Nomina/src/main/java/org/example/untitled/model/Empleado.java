@@ -28,7 +28,7 @@ public class Empleado extends BaseEntity {
 
     @Required
     @Temporal(TemporalType.DATE)
-    private Date fechIngreso;
+    private Date fechaIngreso;
 
     @Required
     private Boolean estado;

@@ -7,15 +7,15 @@ import org.openxava.annotations.Required;
 import org.openxava.annotations.Stereotype;
 
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Enumerated;
-import javax.persistence.EnumType;
+import javax.persistence.*;
 
 @Entity
 @Getter
 @Setter
 public class ReglaSalarial extends BaseEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private EstructuraSalarial estructura;
 
     @Required
     @Column(length = 30)

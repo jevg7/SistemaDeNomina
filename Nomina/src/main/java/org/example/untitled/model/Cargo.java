@@ -15,7 +15,7 @@ public class Cargo extends BaseEntity {
     @Column(length = 50)
     private String nombre;
 
-    @Stereotype("MEMO") //Texto Plano Multilínea Crea una caja de texto grande (un textarea de HTML).
+    @Stereotype("MEMO")
     private String descripcion;
 
     @Money

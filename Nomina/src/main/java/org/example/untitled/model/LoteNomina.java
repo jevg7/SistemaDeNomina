@@ -2,19 +2,23 @@ package org.example.untitled.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.openxava.annotations.Required;
-
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import org.openxava.annotations.*;
+import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Collection;
 
 @Entity
-@Getter
-@Setter
+@Getter @Setter
+@View(members =
+        "descripcion;" +
+                "fechaInicio, fechaFin;" +
+                "estado;" +
+                "resultados"
+)
 public class LoteNomina extends BaseEntity {
 
     @Required
+    @Column(length = 100)
     private String descripcion;
 
     @Required
@@ -27,5 +31,10 @@ public class LoteNomina extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private EstadoLote estado = EstadoLote.ABIERTO;
 
+    @OneToMany(mappedBy = "loteNomina", cascade = CascadeType.REMOVE)
 
+    @ListProperties("empleado.nombreCompleto, totalDevengado, totalDeducciones, totalPagar")
+
+    @ReadOnly
+    private Collection<NominaCalculada> resultados;
 }
