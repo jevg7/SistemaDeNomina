@@ -1,6 +1,5 @@
 package org.example.untitled.model;
 
-
 import lombok.Getter;
 import lombok.Setter;
 import org.openxava.annotations.Money;
@@ -10,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.Min; // Importante
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
@@ -21,6 +21,7 @@ public class Contrato extends BaseEntity {
 
     @Required
     @Money
+    @Min(value = 0, message = "El salario no puede ser negativo") // NUEVO
     private BigDecimal salarioBase;
 
     @Required
@@ -32,12 +33,13 @@ public class Contrato extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TipoContrato tipoContrato;
 
-    public BigDecimal getSalarioMensual() {
-        return this.salarioBase;
-    }
     @ManyToOne
     private EstructuraSalarial estructura;
+
     @ManyToOne
     private Empleado empleado;
 
+    public BigDecimal getSalarioMensual() {
+        return this.salarioBase;
+    }
 }

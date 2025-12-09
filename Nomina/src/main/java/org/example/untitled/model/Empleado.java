@@ -1,20 +1,15 @@
 package org.example.untitled.model;
 
-
 import lombok.Getter;
 import lombok.Setter;
 import org.openxava.annotations.DescriptionsList;
-import org.openxava.annotations.Money;
 import org.openxava.annotations.Required;
-
 import javax.persistence.*;
-import javax.validation.constraints.Min;
 import java.util.Date;
 
 @Entity
 @Getter
 @Setter
-
 public class Empleado extends BaseEntity {
 
     @Required
@@ -42,18 +37,10 @@ public class Empleado extends BaseEntity {
     @Column(length = 30)
     private String numeroCuenta;
 
-    @Required
-    private Boolean estado;
+    // Se elimino el boton de Estado
 
     @Override
     public String toString() {
         return nombreCompleto;
     }
-
 }
-
-
-
-
-
-

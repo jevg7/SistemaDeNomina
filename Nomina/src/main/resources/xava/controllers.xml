@@ -13,15 +13,14 @@
     	    scope="global"/>    
     -->
 
-    <controllers>
     <controller name="LoteNomina">
         <extends controller="Typical"/>
         <action name="procesar"
                 class="org.example.untitled.actions.ProcesarNominaAction"
                 mode="detail"
                 label="Calcular Nómina"
-                icon="calculator"/> </controller>
-</controllers>
+                icon="calculator"/>
+    </controller>
 
     
 </controllers>

@@ -1,7 +1,7 @@
 package org.example.untitled.actions;
 
 import org.example.untitled.model.*;
-import org.example.untitled.Calculators.CalculadoraImpuestos; // Asegúrate que este import sea correcto
+import org.example.untitled.Calculators.CalculadoraImpuestos;
 import org.openxava.actions.ViewBaseAction;
 import org.openxava.jpa.XPersistence;
 import org.openxava.util.Is;
@@ -17,11 +17,12 @@ public class ProcesarNominaAction extends ViewBaseAction {
     @Override
     public void execute() throws Exception {
 
+        // 1. Obtener el ID del Lote actual desde la vista
         Map key = getView().getKeyValues();
         String loteId = (String) key.get("id");
 
         if (Is.empty(loteId)) {
-            addError("Primero debes guardar el Lote de Nómina (dale al botón Save antes de calcular).");
+            addError("Primero debes guardar el Lote de Nómina.");
             return;
         }
 
@@ -33,29 +34,30 @@ public class ProcesarNominaAction extends ViewBaseAction {
             return;
         }
 
-        if (lote.getEstado() == EstadoLote.PAGADO || lote.getEstado() == EstadoLote.CERRADO) {
-            addError("Este lote ya está cerrado o pagado y no se puede recalcular.");
+        // Validación: No permitir recalcular si ya está pagado
+        if (lote.getEstado() == EstadoLote.PAGADO || lote.getEstado() == EstadoLote.DEVENGADO) {
+            addError("Este lote ya está procesado (Devengado/Pagado) y no se puede modificar.");
             return;
         }
 
         // =================================================================================
-        // 0. LIMPIEZA PREVIA: Borrar cálculos anteriores de este lote para evitar duplicados
+        // 2. LIMPIEZA: Borrar cálculos anteriores de este lote (para evitar duplicados)
         // =================================================================================
-        // Primero borramos las líneas (detalle) asociadas a las nóminas de este lote
         String deleteLineas = "DELETE FROM LineaNomina l WHERE l.nominaCalculada.id IN " +
                 "(SELECT n.id FROM NominaCalculada n WHERE n.loteNomina.id = :loteId)";
         em.createQuery(deleteLineas).setParameter("loteId", loteId).executeUpdate();
 
-        // Luego borramos las cabeceras (nóminas) de este lote
         String deleteNominas = "DELETE FROM NominaCalculada n WHERE n.loteNomina.id = :loteId";
         em.createQuery(deleteNominas).setParameter("loteId", loteId).executeUpdate();
 
-        em.flush(); // Forzamos el borrado inmediato en la BD
+        em.flush(); // Aplicar borrado
+
+        // =================================================================================
+        // 3. PROCESAMIENTO
         // =================================================================================
 
-
-        // 1. Buscamos empleados activos
-        String jpql = "FROM Empleado e WHERE e.estado = true";
+        // Buscamos TODOS los empleados (sin filtrar por estado, como pediste)
+        String jpql = "FROM Empleado e";
         TypedQuery<Empleado> query = em.createQuery(jpql, Empleado.class);
         List<Empleado> empleados = query.getResultList();
 
@@ -63,94 +65,100 @@ public class ProcesarNominaAction extends ViewBaseAction {
 
         for (Empleado emp : empleados) {
 
-            // Buscar contrato vigente
+            // A. Buscar contrato vigente
+            // Seleccionamos el contrato del empleado. Si hay varios, toma el primero (idealmente filtrar por activo)
             String contratoJpql = "FROM Contrato c WHERE c.empleado.id = :empId";
-            // OJO: Si tienes muchos contratos, deberías filtrar por el activo o fecha más reciente
             List<Contrato> contratos = em.createQuery(contratoJpql, Contrato.class)
                     .setParameter("empId", emp.getId())
                     .getResultList();
 
-            if (contratos.isEmpty()) continue; // Si no tiene contrato, saltamos al siguiente empleado
+            if (contratos.isEmpty()) continue; // Si no tiene contrato, no se le paga
 
             Contrato contrato = contratos.get(0);
 
-            // --- Cálculos ---
-            BigDecimal salarioBase = contrato.getSalarioMensual(); // Asumiendo que en Contrato es Double
+            // B. Obtener Salario Base
+            BigDecimal salarioBase = contrato.getSalarioMensual();
             if (salarioBase == null) salarioBase = BigDecimal.ZERO;
 
-            // Asegurarnos que la calculadora no devuelva NULL
+            // C. Calcular Impuestos de Ley (INSS e IR)
             BigDecimal inss = CalculadoraImpuestos.calcularINSS(salarioBase);
             if (inss == null) inss = BigDecimal.ZERO;
 
             BigDecimal ir = CalculadoraImpuestos.calcularIR(salarioBase);
             if (ir == null) ir = BigDecimal.ZERO;
 
-            // --- Deducciones Voluntarias ---
+            // D. Calcular Deducciones Voluntarias (Préstamos, etc.)
             BigDecimal totalDeduccionesVoluntarias = BigDecimal.ZERO;
 
-            // Usamos una consulta segura para evitar errores si no hay deducciones
-            String dedJpql = "FROM DeduccionVoluntaria d WHERE d.empleado.id = :empId"; // Quitamos 'AND activo=true' si no tienes ese campo aun
-            // Si tienes el campo 'activo' en DeduccionVoluntaria, descomenta la siguiente línea:
-            // dedJpql = "FROM DeduccionVoluntaria d WHERE d.empleado.id = :empId AND d.activo = true";
+            // Asumiendo que DeduccionVoluntaria tiene campo 'activo'
+            String dedJpql = "FROM DeduccionVoluntaria d WHERE d.empleado.id = :empId AND d.activo = true";
+            List<DeduccionVoluntaria> deducciones = em.createQuery(dedJpql, DeduccionVoluntaria.class)
+                    .setParameter("empId", emp.getId())
+                    .getResultList();
 
-            List deducciones = em.createQuery(dedJpql).setParameter("empId", emp.getId()).getResultList();
-
-            // --- Calcular Totales Finales ---
+            // E. Totales
             BigDecimal granTotalDeducciones = inss.add(ir);
 
-            // Sumar voluntarias (usando casting seguro)
-            for (Object obj : deducciones) {
-                // Asumo que tu entidad es DeduccionVoluntaria, ajusta si es necesario
-                // DeduccionVoluntaria ded = (DeduccionVoluntaria) obj;
-                // Double cuotaVal = ded.getCuotaMensual();
-                // if (cuotaVal != null) {
-                //    granTotalDeducciones = granTotalDeducciones.add(BigDecimal.valueOf(cuotaVal));
-                // }
-            }
-
-            BigDecimal totalPagar = salarioBase.subtract(granTotalDeducciones);
-
-            // --- Guardar Cabecera (NominaCalculada) ---
+            // F. Persistir Cabecera (NominaCalculada)
             NominaCalculada nomina = new NominaCalculada();
             nomina.setLoteNomina(lote);
             nomina.setEmpleado(emp);
+
+            // Guardamos la entidad primero para poder asignarle líneas hijas
+            em.persist(nomina);
+
+            // G. Crear Líneas de Detalle (Ingresos)
+            crearLinea(em, nomina, "Salario Base", salarioBase, TipoRegla.INGRESO);
+
+            // H. Crear Líneas de Detalle (Deducciones de Ley)
+            crearLinea(em, nomina, "INSS Laboral (" + (CalculadoraImpuestos.TASA_INSS_LABORAL * 100) + "%)", inss, TipoRegla.DEDUCCION);
+            crearLinea(em, nomina, "IR (Impuesto Renta)", ir, TipoRegla.DEDUCCION);
+
+            // I. Procesar y guardar líneas de Deducciones Voluntarias
+            for (DeduccionVoluntaria ded : deducciones) {
+                if (ded.getCuotaMensual() != null && ded.getCuotaMensual() > 0) {
+                    BigDecimal cuota = BigDecimal.valueOf(ded.getCuotaMensual());
+
+                    // Sumar al total
+                    granTotalDeducciones = granTotalDeducciones.add(cuota);
+                    totalDeduccionesVoluntarias = totalDeduccionesVoluntarias.add(cuota);
+
+                    // Crear línea en la colilla
+                    crearLinea(em, nomina, ded.getConcepto(), cuota, TipoRegla.DEDUCCION);
+                }
+            }
+
+            // J. Actualizar Totales Finales en la Cabecera
+            BigDecimal totalPagar = salarioBase.subtract(granTotalDeducciones);
+
             nomina.setTotalDevengado(salarioBase.doubleValue());
             nomina.setTotalDeducciones(granTotalDeducciones.doubleValue());
             nomina.setTotalPagar(totalPagar.doubleValue());
 
-            em.persist(nomina);
-
-            // --- Guardar Líneas (Detalle) ---
-            crearLinea(em, nomina, "Salario Base", salarioBase, TipoRegla.INGRESO); // Corregido el TipoRegla
-            crearLinea(em, nomina, "INSS Laboral", inss, TipoRegla.DEDUCCION);
-            crearLinea(em, nomina, "IR (Impuesto Renta)", ir, TipoRegla.DEDUCCION);
-
-
+            // Actualizamos la nómina con los valores finales
+            em.merge(nomina);
 
             procesados++;
         }
 
-        // Actualizar estado del lote
-        lote.setEstado(EstadoLote.CERRADO); // O el estado que prefieras, ej: CALCULADO
+        // 4. Actualizar estado del lote
+        lote.setEstado(EstadoLote.CALCULADO); // Marcamos como calculado
         em.merge(lote);
 
-        // Confirmar cambios y refrescar pantalla
+        // 5. Finalizar
         em.flush();
-        getView().refresh();
-        addMessage("Nómina recalculada correctamente. Se procesaron " + procesados + " empleados.");
+        getView().refresh(); // Refresca la vista para ver los nuevos datos
+        addMessage("Nómina procesada con éxito. Se calcularon " + procesados + " empleados.");
     }
 
-
+    // Método auxiliar para crear líneas limpiamente
     private void crearLinea(EntityManager em, NominaCalculada nomina, String descripcion, BigDecimal monto, TipoRegla tipo) {
         if (monto != null && monto.compareTo(BigDecimal.ZERO) > 0) {
             LineaNomina linea = new LineaNomina();
             linea.setNominaCalculada(nomina);
-            linea.setDescripcion(descripcion); // Asegúrate que LineaNomina tenga este campo
-
+            linea.setDescripcion(descripcion);
             linea.setMonto(monto.doubleValue());
-            linea.setReglaSalarial(null);
-
-
+            // linea.setReglaSalarial(null);
             em.persist(linea);
         }
     }
