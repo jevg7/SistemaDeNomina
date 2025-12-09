@@ -19,7 +19,8 @@
         <action name="procesar"
                 class="org.example.untitled.actions.ProcesarNominaAction"
                 mode="detail"
-                image="execute.gif"/> </controller>
+                label="Calcular Nómina"
+                icon="calculator"/> </controller>
 </controllers>
 
     

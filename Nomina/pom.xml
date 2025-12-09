@@ -96,7 +96,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>untitled</finalName>
+		<finalName>SistemaDeNomina</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

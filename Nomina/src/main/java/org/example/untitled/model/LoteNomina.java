@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.openxava.annotations.*;
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Entity
@@ -36,5 +37,5 @@ public class LoteNomina extends BaseEntity {
     @ListProperties("empleado.nombreCompleto, totalDevengado, totalDeducciones, totalPagar")
 
     @ReadOnly
-    private Collection<NominaCalculada> resultados;
+    private Collection<NominaCalculada> resultados =new ArrayList<>();
 }

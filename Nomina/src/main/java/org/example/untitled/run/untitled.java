@@ -12,7 +12,7 @@ public class untitled {
 
 	public static void main(String[] args) throws Exception {
 
-		AppServer.run("untitled"); // Use AppServer.run("") to run in root context
+		AppServer.run("SistemaDeNomina"); // Use AppServer.run("") to run in root context
 	}
 
 }

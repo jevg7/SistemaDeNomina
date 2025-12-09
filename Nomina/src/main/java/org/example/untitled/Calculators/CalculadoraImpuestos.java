@@ -21,7 +21,7 @@ public class CalculadoraImpuestos {
         // 3. Proyección Anual
         BigDecimal rentaNetaAnual = salarioNeto.multiply(new BigDecimal(12));
 
-        // 4. Aplicar Tabla Progresiva Anual (Valores oficiales NI)
+        // 4. Aplicar Tabla Progresiva Anual
         BigDecimal impuestoBase = BigDecimal.ZERO;
         BigDecimal porcentajeAplicable = BigDecimal.ZERO;
         BigDecimal sobreExceso = BigDecimal.ZERO;

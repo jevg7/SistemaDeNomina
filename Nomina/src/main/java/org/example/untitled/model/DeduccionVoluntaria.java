@@ -12,7 +12,7 @@ public class DeduccionVoluntaria extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Required
-    @DescriptionsList
+    @DescriptionsList(descriptionProperties="nombreCompleto")
     private Empleado empleado;
 
     @Required

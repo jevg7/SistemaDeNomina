@@ -22,4 +22,9 @@ public class Cargo extends BaseEntity {
     private BigDecimal salarioMinimoReferencia;
     @Money
     private BigDecimal salarioMaximoReferencia;
+
+    @Override
+    public String toString() {
+        return nombre;
+    }
 }
