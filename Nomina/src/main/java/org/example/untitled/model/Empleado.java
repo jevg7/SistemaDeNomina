@@ -18,7 +18,7 @@ import java.util.Date;
 public class Empleado extends BaseEntity {
 
     @Required
-    @Column(length = 14, unique = true)
+    @Column(length = 16, unique = true)
     private String cedula;
 
     @Required

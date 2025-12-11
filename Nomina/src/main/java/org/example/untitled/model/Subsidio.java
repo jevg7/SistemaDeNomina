@@ -3,6 +3,7 @@ package org.example.untitled.model;
 import lombok.Getter;
 import lombok.Setter;
 import org.dom4j.tree.AbstractEntity;
+import org.openxava.annotations.DescriptionsList;
 import org.openxava.annotations.Required;
 
 import javax.persistence.Entity;

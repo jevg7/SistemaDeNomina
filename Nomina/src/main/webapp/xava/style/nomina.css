@@ -1,0 +1,70 @@
+@import 'base.css';
+
+:root {
+    /* === TUS COLORES === */
+    --color-azul: #27295f;  /* Este es tu Azul Navy Corporativo */
+    --color-verde: #74A945;
+    --color-gris: #B8B7B7;
+    --color-blanco: #ffffff;
+
+    /* Configuración estándar de OpenXava */
+    --modules-list-background: var(--color-azul);
+    --modules-list-color: var(--color-blanco);
+
+
+    --modules-list-selected-color: var(--color-blanco);
+
+    --modules-list-hover-background: rgba(255,255,255,0.1);
+    --module-header-background: var(--color-azul);
+    --module-header-color: var(--color-blanco);
+
+
+    --action-color: var(--color-azul);
+    --action-hover-color: #1a1c4b;
+
+    --default-action-button-background: var(--color-azul);
+    --required-editor-border: var(--color-azul);
+
+    /* Variables de compatibilidad */
+    --button-bar-button-color: var(--color-azul);
+    --button-bar-background: var(--color-blanco);
+    --list-formats-color: var(--color-gris);
+    --list-formats-hover-color: white;
+    --background: var(--color-blanco);
+    --color: var(--color-azul);
+    --frame-background: var(--color-blanco);
+}
+
+/* === PANTALLA DE INICIO (SOLO TEXTO) === */
+
+.home-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 75vh;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+}
+
+.home-title {
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--color-azul);
+    letter-spacing: -2px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+.home-subtitle {
+    font-size: 20px;
+    color: #666;
+    font-weight: 300;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+
+
+    border-top: 2px solid var(--color-azul);
+
+    padding-top: 20px;
+}

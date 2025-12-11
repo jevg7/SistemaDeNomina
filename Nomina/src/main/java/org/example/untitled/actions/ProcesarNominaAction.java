@@ -38,21 +38,19 @@ public class ProcesarNominaAction extends ViewBaseAction {
             return;
         }
 
-        // =================================================================================
+
         // 0. LIMPIEZA PREVIA: Borrar cálculos anteriores de este lote para evitar duplicados
-        // =================================================================================
-        // Primero borramos las líneas (detalle) asociadas a las nóminas de este lote
+
+
         String deleteLineas = "DELETE FROM LineaNomina l WHERE l.nominaCalculada.id IN " +
                 "(SELECT n.id FROM NominaCalculada n WHERE n.loteNomina.id = :loteId)";
         em.createQuery(deleteLineas).setParameter("loteId", loteId).executeUpdate();
 
-        // Luego borramos las cabeceras (nóminas) de este lote
+
         String deleteNominas = "DELETE FROM NominaCalculada n WHERE n.loteNomina.id = :loteId";
         em.createQuery(deleteNominas).setParameter("loteId", loteId).executeUpdate();
 
-        em.flush(); // Forzamos el borrado inmediato en la BD
-        // =================================================================================
-
+        em.flush();
 
         // 1. Buscamos empleados activos
         String jpql = "FROM Empleado e WHERE e.estado = true";
@@ -65,7 +63,7 @@ public class ProcesarNominaAction extends ViewBaseAction {
 
             // Buscar contrato vigente
             String contratoJpql = "FROM Contrato c WHERE c.empleado.id = :empId";
-            // OJO: Si tienes muchos contratos, deberías filtrar por el activo o fecha más reciente
+
             List<Contrato> contratos = em.createQuery(contratoJpql, Contrato.class)
                     .setParameter("empId", emp.getId())
                     .getResultList();
@@ -75,10 +73,9 @@ public class ProcesarNominaAction extends ViewBaseAction {
             Contrato contrato = contratos.get(0);
 
             // --- Cálculos ---
-            BigDecimal salarioBase = contrato.getSalarioMensual(); // Asumiendo que en Contrato es Double
+            BigDecimal salarioBase = contrato.getSalarioMensual();
             if (salarioBase == null) salarioBase = BigDecimal.ZERO;
 
-            // Asegurarnos que la calculadora no devuelva NULL
             BigDecimal inss = CalculadoraImpuestos.calcularINSS(salarioBase);
             if (inss == null) inss = BigDecimal.ZERO;
 
@@ -88,10 +85,8 @@ public class ProcesarNominaAction extends ViewBaseAction {
             // --- Deducciones Voluntarias ---
             BigDecimal totalDeduccionesVoluntarias = BigDecimal.ZERO;
 
-            // Usamos una consulta segura para evitar errores si no hay deducciones
-            String dedJpql = "FROM DeduccionVoluntaria d WHERE d.empleado.id = :empId"; // Quitamos 'AND activo=true' si no tienes ese campo aun
-            // Si tienes el campo 'activo' en DeduccionVoluntaria, descomenta la siguiente línea:
-            // dedJpql = "FROM DeduccionVoluntaria d WHERE d.empleado.id = :empId AND d.activo = true";
+
+            String dedJpql = "FROM DeduccionVoluntaria d WHERE d.empleado.id = :empId";
 
             List deducciones = em.createQuery(dedJpql).setParameter("empId", emp.getId()).getResultList();
 
@@ -100,12 +95,7 @@ public class ProcesarNominaAction extends ViewBaseAction {
 
             // Sumar voluntarias (usando casting seguro)
             for (Object obj : deducciones) {
-                // Asumo que tu entidad es DeduccionVoluntaria, ajusta si es necesario
-                // DeduccionVoluntaria ded = (DeduccionVoluntaria) obj;
-                // Double cuotaVal = ded.getCuotaMensual();
-                // if (cuotaVal != null) {
-                //    granTotalDeducciones = granTotalDeducciones.add(BigDecimal.valueOf(cuotaVal));
-                // }
+
             }
 
             BigDecimal totalPagar = salarioBase.subtract(granTotalDeducciones);
@@ -131,10 +121,10 @@ public class ProcesarNominaAction extends ViewBaseAction {
         }
 
         // Actualizar estado del lote
-        lote.setEstado(EstadoLote.CERRADO); // O el estado que prefieras, ej: CALCULADO
+        lote.setEstado(EstadoLote.CERRADO);
         em.merge(lote);
 
-        // Confirmar cambios y refrescar pantalla
+
         em.flush();
         getView().refresh();
         addMessage("Nómina recalculada correctamente. Se procesaron " + procesados + " empleados.");
@@ -145,7 +135,7 @@ public class ProcesarNominaAction extends ViewBaseAction {
         if (monto != null && monto.compareTo(BigDecimal.ZERO) > 0) {
             LineaNomina linea = new LineaNomina();
             linea.setNominaCalculada(nomina);
-            linea.setDescripcion(descripcion); // Asegúrate que LineaNomina tenga este campo
+            linea.setDescripcion(descripcion);
 
             linea.setMonto(monto.doubleValue());
             linea.setReglaSalarial(null);
